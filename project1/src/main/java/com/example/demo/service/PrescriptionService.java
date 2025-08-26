@@ -1,23 +1,48 @@
 package com.example.demo.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.model.Doctor;
+import com.example.demo.model.Patient;
 import com.example.demo.model.Prescription;
+import com.example.demo.repository.DoctorRepository;
+import com.example.demo.repository.PatientRepository;
 import com.example.demo.repository.PrescriptionRepository;
+import com.example.demo.serviceinterface.PrescriptionInterface;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 @Service
-public class PrescriptionService {
+public class PrescriptionService implements PrescriptionInterface {
 	
 	
+	@Autowired
+	private DoctorRepository doctorRepository;
 	
+	@Autowired
+	private PatientRepository patientRepository;
 	@Autowired
 	private PrescriptionRepository repo1;
 	
 	public void addPrescription(Prescription prescription) {
-		// TODO Auto-generated method stub
+		//Doctor doctor = doctorRepository.findById(prescription.getDoctor().getId())
+	            //.orElseThrow(() -> new RuntimeException("Doctor not found"));
+		Patient patient = patientRepository.findById(prescription.getPatient().getId())
+	            .orElseThrow(() -> new RuntimeException("Patient not found"));
+		//prescription.setDoctor(doctor);
+		prescription.setPatient(patient);
+	Prescription p=new Prescription();
+	p.setMedicineName(prescription.getMedicineName());
+	p.setInstructions(prescription.getInstructions());
+	//p.setDoctor(prescription.getDoctor());
+	p.setPatient(prescription.getPatient());
 		 repo1.save(prescription);
 		
 	}
@@ -26,9 +51,20 @@ public class PrescriptionService {
 	{
 		return repo1.findById(id).orElse(null);
 		
-		//return pres.map(ResponseEntity::ok).orElseGet(()->ResponseEntity.status(404).body("prescription not found"));
+		
 		
 	}
+	
+	
+	
+	
+	public List<Prescription> getAllPrescription() {
+		
+		return repo1.findAll();
+	}
+	
+	
+	
 	
 	public boolean delPrescription(int id)
 	{
@@ -41,18 +77,7 @@ public class PrescriptionService {
 			return false;
 		}
 	}
-	/*public Prescription updatePrescription(int id,Prescription updatedprescription)
-	{
-		 return repo1.findById(id).map(prescription -> {
-			   
-	            prescription.setTimeOfUse(updatedprescription.getTimeOfUse());
-	            prescription.setDoctorName(updatedprescription.getDoctorName());
-	            prescription.setMedicineName(updatedprescription.getMedicineName());
-	            return repo1.save(prescription);
-	        }).orElse(null);
-		
-		
-	}*/
+	
 	
 
 	public Prescription updatedPrescription(int id,Prescription updatedprescription)
@@ -77,10 +102,46 @@ public class PrescriptionService {
 		
 		
 	}
-	
-	
-	public List<Prescription> getAllPrescription() {
-		// TODO Auto-generated method stub
-		return repo1.findAll();
-	}
+	/*public byte[] getPrescriptionFileById(int id) {
+	    Optional<Prescription> presOpt = repo1.findById(id);
+	    if (presOpt.isPresent()) {
+	        return presOpt.get().getFileData(); // assuming fileData is stored as byte[] in DB
+	    }
+	    return null;
+	}*/
+
+    public byte[] generatePrescriptionPdf(int id) throws Exception {
+        Optional<Prescription> opt = repo1.findById(id);
+        if (opt.isEmpty()) {
+            return null;
+        }
+
+        Prescription p = opt.get();
+        Patient patient=p.getPatient();
+        Doctor doctor=patient.getDoctor();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document document = new Document();
+        PdfWriter.getInstance(document, out);
+        document.open();
+
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+        Font textFont = FontFactory.getFont(FontFactory.HELVETICA, 12);
+
+        document.add(new Paragraph("Digital Prescription", titleFont));
+        document.add(new Paragraph(" ")); // spacer
+        document.add(new Paragraph("Doctor: " + doctor.getId(), textFont));
+        document.add(new Paragraph("Patient: " + patient.getId(), textFont));
+        document.add(new Paragraph("Instructions: " + p.getInstructions(), textFont));
+        document.add(new Paragraph("Medicine name: " + p.getMedicineName(), textFont));
+
+        document.close();
+
+        return out.toByteArray();
+    }
 }
+
+
+	
+	
+	
+

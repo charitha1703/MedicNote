@@ -2,11 +2,14 @@ package com.example.demo.controller;
 
 
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,10 +17,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.model.DoctorModel;
-import com.example.demo.service.DoctorService;
+import com.example.demo.model.Doctor;
+import com.example.demo.model.Prescription;
+import com.example.demo.repository.DoctorRepository;
+import com.example.demo.securityconfig.JwtUtil;
+import com.example.demo.serviceinterface.DoctorInterface;
 
 
 
@@ -27,36 +34,65 @@ public class DoctorController {
     
 	
 
+	
+	
+	
 	@Autowired
-	private DoctorService service;
+	private DoctorInterface serv;
+	
+	 @Autowired
+	    private DoctorRepository doctorRepo;
+	 
+	    @Autowired
+	    private PasswordEncoder passwordEncoder;
+	    
+	    @Autowired
+	    private JwtUtil jwtUtil;
 	
 	
 	
+	  @PostMapping("/register")
+	    public ResponseEntity<?> registerDoctor(@RequestParam String username,
+	                                            @RequestParam String password,@RequestParam String email) {
+	        if (doctorRepo.findByUsername(username).isPresent()) {
+	            return ResponseEntity.status(HttpStatus.CONFLICT)
+	                                 .body("Username already exists");
+	        }
+
+	        Doctor doctor = new Doctor();
+	        doctor.setUsername(username);
+	        doctor.setEmail(email);
+	        doctor.setPassword(passwordEncoder.encode(password)); // Hash the password
+	        doctor.setRole("DOCTOR");
+
+	        doctorRepo.save(doctor);
+	        return ResponseEntity.ok("Doctor registered successfully");
+	    }
+	    
+	    //doctor login
+	    
+	    @PostMapping("/login")
+	    public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+	        Optional<Doctor> doctorOpt = doctorRepo.findByUsername(username);
+
+	        if (doctorOpt.isPresent()) {
+	            Doctor doctor = doctorOpt.get();
+
+	            if (passwordEncoder.matches(password, doctor.getPassword())) {
+	                String token = jwtUtil.generateToken(doctor.getUsername(), doctor.getRole());
+	                return ResponseEntity.ok(Collections.singletonMap("token", token));
+	            }
+	        }
+
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+	    }
 	
-	@PostMapping("/register")
-	public ResponseEntity<String> register(@RequestBody DoctorModel doctormodel)
+	//get the doctor using id
+	
+	@GetMapping("/getdoctor/{id}")
+	public ResponseEntity<Doctor> getAllDoctors(@PathVariable int id)
 	{
-		service.register(doctormodel);
-		return ResponseEntity.ok("User registered successfully");
-		
-	}
-	
-	
-	
-	
-	@PostMapping("/login")
-	public String login(@RequestBody DoctorModel doctormodel)
-	{
-		boolean isLogin=service.login(doctormodel.getEmail(),doctormodel.getPassword());
-	    return isLogin ? "login successfull!":"invalid credantials!";
-	}
-	
-	
-	
-	@GetMapping("/getalldoctors/{id}")
-	public ResponseEntity<DoctorModel> getAllDoctors(@PathVariable int id)
-	{
-		DoctorModel doctor=service.getAllDoctors(id);
+		Doctor doctor=serv.getAllDoctors(id);
 		if(doctor!=null)
 		{
 			return ResponseEntity.ok(doctor);
@@ -65,18 +101,22 @@ public class DoctorController {
 			return ResponseEntity.notFound().build();		
 	}
 	
+	//returning all the doctors
 	
 	@GetMapping("/getallthedoctors")
-    public List<DoctorModel> getAllDoctors()
+    public List<Doctor> getAllDoctors()
     {
-		return service.getAllDoctors();
+		return serv.getAllDoctors();
 	
     }
+	
+	
+	//delete the doctor using the id
 	
 	@DeleteMapping("/deletedoctor/{id}")
 	public ResponseEntity<String> deleteDoctor(@PathVariable int id)
 	{
-	            boolean body=service.deleteDoctor(id);
+	            boolean body=serv.deleteDoctor(id);
 	            if(body)
 	            {
 	            	return ResponseEntity.ok("doctor deleted successfully");
@@ -88,11 +128,12 @@ public class DoctorController {
 	            
 	}
 	
+	//update the doctor using id
 	
 	@PutMapping("/updatedoctor/{id}")
-	public ResponseEntity<String> updateDoctor(@PathVariable int id,@RequestBody DoctorModel updateddoctor)
+	public ResponseEntity<String> updateDoctor(@PathVariable int id,@RequestBody Doctor updateddoctor)
 	{
-		DoctorModel doctor=service.updateDoctor(id,updateddoctor);
+		Doctor doctor=serv.updateDoctor(id,updateddoctor);
 		if(doctor!=null)
 		{
 			return ResponseEntity.ok("Doctor details updated successfully");
@@ -100,6 +141,20 @@ public class DoctorController {
 		else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found");
 			}
+	}
+	
+	@GetMapping("/getallprescriptions/{id}")
+	public ResponseEntity<?> getallprescriptions(@PathVariable int id)
+	{
+		List<Prescription> prescriptions = serv.getallprescriptions(id);
+
+        if (prescriptions.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("No prescriptions found for doctor ID: " + id);
+        }
+
+        return ResponseEntity.ok(prescriptions);
+		
 	}
 	
 	

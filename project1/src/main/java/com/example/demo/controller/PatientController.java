@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Patient;
-import com.example.demo.service.PatientService;
+import com.example.demo.serviceinterface.PatientInterface;
 
 @RestController
 @RequestMapping("api/auth/patient")
@@ -23,14 +24,37 @@ public class PatientController {
 	
 	
 	@Autowired
-	PatientService patientservice;
+	PatientInterface patientservice;
 	
 	@PostMapping("/register")
 	public ResponseEntity<String>  register(@RequestBody Patient patient)
 	{
-		 patientservice.register(patient);
-		 return ResponseEntity.ok("Registration successfull");
+		
+		if(patientservice.register(patient)==false)
+		{
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("username already exist");
+		}
+		else {
+			return ResponseEntity.ok("patient added successfully");
+		}
+		
+		
 		 
+	}
+	
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestParam String username,@RequestParam String password)
+	{
+		
+		if(patientservice.login(username,password)==true)
+		{
+			return ResponseEntity.ok("login successfull");
+		}
+		else {
+			return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("invalid username or password");
+		}
+		
+		
 	}
 	
 	@GetMapping("/getpatient/{id}")
@@ -63,7 +87,7 @@ public class PatientController {
 			return ResponseEntity.ok("deleted successfully");
 		}
 		else {
-			return ResponseEntity.ok("patient not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
 		}
 	}
 	
@@ -77,7 +101,7 @@ public class PatientController {
 			 return ResponseEntity.ok("patient updated successfully");
 		 }
 		 else {
-		 return ResponseEntity.ok("patient not found ");
+			 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
 		 }
 	}
 

@@ -3,38 +3,35 @@ package com.example.demo.service;
 
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.DoctorModel;
+import com.example.demo.model.Doctor;
+import com.example.demo.model.Prescription;
 import com.example.demo.repository.DoctorRepository;
+import com.example.demo.repository.PrescriptionRepository;
+import com.example.demo.serviceinterface.DoctorInterface;
 
 @Service
 
-public class DoctorService {
+public class DoctorService  implements DoctorInterface{
 	
 	@Autowired
 	private DoctorRepository repo;
 	
+	@Autowired
+	private PrescriptionRepository repo1;
 	
-	public DoctorModel register(DoctorModel doctormodel)
-	{
-		
-	
-		return repo.save(doctormodel);
-	}
-	
-	public boolean login(String email,String password)
-	{
-		Optional<DoctorModel>user=repo.findByEmail(email);
-		return user.isPresent() && user.get().getPassword().equals(password);
-	}
+	 @Autowired
+	    private PasswordEncoder passwordEncoder;
 	
 	
 	
-	public DoctorModel getAllDoctors(int id)
+	
+	
+	public Doctor getAllDoctors(int id)
 	{
 		return repo.findById(id).orElse(null);
 	}
@@ -54,24 +51,36 @@ public class DoctorService {
 		
 	}
 	
-	public DoctorModel updateDoctor(int id,DoctorModel updatedoctor)
+	public Doctor updateDoctor(int id,Doctor updatedoctor)
 	{
 		
 		return repo.findById(id).map(doctor->{
 			
 			doctor.setEmail(updatedoctor.getEmail());
-			doctor.setPassword(updatedoctor.getPassword());	
+			
+			doctor.setUsername(updatedoctor.getUsername());
+			doctor.setPassword(passwordEncoder.encode(updatedoctor.getPassword()));	
 			return repo.save(doctor);
 		}).orElse(null);
 		
 		
 		
 	}
-	 public List<DoctorModel> getAllDoctors()
+	 public List<Doctor> getAllDoctors()
 	 {
 		return repo.findAll();
 		
 	 }
+
+
+
+	@Override
+	public List<Prescription> getallprescriptions(int doctorid) {
+	// TODO Auto-generated method stub
+		return repo1.findByDoctorId(doctorid);
+	}
+	 
+	 
 	
 }
 

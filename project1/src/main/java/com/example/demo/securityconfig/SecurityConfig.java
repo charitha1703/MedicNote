@@ -24,7 +24,9 @@ public class SecurityConfig {
             .authorizeHttpRequests()
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers(HttpMethod.PUT, "/api/auth/pres/**").hasRole("DOCTOR")
-            .anyRequest().authenticated()
+            .requestMatchers(HttpMethod.POST,"/api/auth/pres/addprescription/**").hasRole("DOCTOR")
+            .requestMatchers(HttpMethod.DELETE,"/api/auth/pres/deleteprescription/**").hasRole("DOCTOR")
+            .anyRequest().permitAll()
             .and()
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
