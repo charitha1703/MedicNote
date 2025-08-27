@@ -71,9 +71,6 @@ public class DoctorService  implements DoctorInterface{
 		return repo.findAll();
 		
 	 }
-
-
-
 	@Override
 	public List<Prescription> getallprescriptions(int doctorid) {
 	// TODO Auto-generated method stub

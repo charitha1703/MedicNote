@@ -143,6 +143,7 @@ public class DoctorController {
 			}
 	}
 	
+	// Get all the prescriptions using the doctor id
 	@GetMapping("/getallprescriptions/{id}")
 	public ResponseEntity<?> getallprescriptions(@PathVariable int id)
 	{

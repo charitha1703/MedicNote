@@ -35,24 +35,7 @@ public class Prescription {
 	@JsonIgnoreProperties("prescriptions")
 	@JsonBackReference
 	private Patient patient;
-	
-	
-	
-	
-	
-	/*@ManyToOne
-	@JoinColumn(name="doctorid")
-	@JsonIgnoreProperties("prescriptions")
-	@JsonBackReference
-	private Doctor doctor;*/
-	
-	
-	
-	
-	
-	
-	
-	
+
 	public Prescription() {
 		// TODO Auto-generated constructor stub
 	}
@@ -87,14 +70,6 @@ public class Prescription {
 	public void setInstructions(String instructions) {
 		this.instructions = instructions;
 	}
-
-	/*public Doctor getDoctor() {
-		return doctor;
-	}
-
-	public void setDoctor(Doctor doctor) {
-		this.doctor = doctor;
-	}*/
 
 	public Patient getPatient() {
 		return patient;

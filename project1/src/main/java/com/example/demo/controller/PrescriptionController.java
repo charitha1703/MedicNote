@@ -44,7 +44,7 @@ public class PrescriptionController {
 	 @PostMapping("/addprescription")
 	    public ResponseEntity<?> addPrescritpion(@RequestBody Prescription prescription)
 	    {
-		 //System.out.println("DEBUG => Doctor: " + prescription.getDoctor());
+		 
 		    System.out.println("DEBUG => Patient: " + prescription.getPatient());
 	    	 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    	 
@@ -127,26 +127,6 @@ public class PrescriptionController {
           if (authentication == null || !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DOCTOR"))) {
               return ResponseEntity.status(403).body("Only doctors can update prescriptions");
           }
-    	
-    	
-    	
-    	
-    	/*Optional<Prescription> optional = prescriptionrepository.findById(id);
-
-        if (optional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Prescription existing = optional.get();
-        existing.setMedicineName(updatedprescription.getMedicineName());
-        existing.setInstructions(updatedprescription.getInstructions());
-
-        prescriptionrepository.save(existing);
-
-        return ResponseEntity.ok("Prescription updated successfully");*/
-        
-    
-        
         if(prescriptionservice.updatedPrescription(id,updatedprescription)==null)
         {
         	return ResponseEntity.notFound().build();

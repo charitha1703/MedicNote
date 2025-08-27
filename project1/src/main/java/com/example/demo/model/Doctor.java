@@ -33,17 +33,6 @@ public class Doctor {
     @JsonManagedReference
     private List<Patient> patientlist;
     
-    
-    
-    
-    
-    /*@OneToMany(mappedBy="doctor",cascade= {CascadeType.DETACH,CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-    @JsonManagedReference
-    private List<Prescription> prescriptionlist;*/
-    
-    
-    
-    
     public Doctor() {
     
 		// TODO Auto-generated constructor stub
@@ -95,14 +84,6 @@ public class Doctor {
 	public void setPatientlist(List<Patient> patientlist) {
 		this.patientlist = patientlist;
 	}
-
-	/*public List<Prescription> getPrescriptionlist() {
-		return prescriptionlist;
-	}
-
-	public void setPrescriptionlist(List<Prescription> prescriptionlist) {
-		this.prescriptionlist = prescriptionlist;
-	}*/
 
     
 }

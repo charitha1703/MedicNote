@@ -39,21 +39,12 @@ public class Patient {
 	private List<Prescription> prescriptionlist;
 	
 	
-	
-	
-	
 	@ManyToOne
 	@JoinColumn(name="doctorid" ,referencedColumnName="id")
 	@JsonIgnoreProperties("patient")
 	@JsonBackReference
 	private Doctor doctor;
 	
-	
-
-	
-	
-	
-
 	public Patient() {
 		// TODO Auto-generated constructor stub
 	}
@@ -128,13 +119,5 @@ public class Patient {
 		this.prescriptionlist = prescriptionlist;
 	}
 
-
-	
-
-
-	
-	
-	
-	
 
 }

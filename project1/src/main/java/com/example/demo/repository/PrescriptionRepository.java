@@ -11,7 +11,7 @@ import com.example.demo.model.Prescription;
 
 public interface PrescriptionRepository  extends JpaRepository<Prescription,Integer>{
 	
-	// @Query("SELECT p FROM Prescription p WHERE p.patient.doctor.id = :doctorId")
+	
 	@Query("SELECT p FROM Prescription p " +
 		       "JOIN p.patient pt " +
 		       "WHERE pt.doctor.id = :doctorId")

@@ -23,8 +23,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 public class PrescriptionService implements PrescriptionInterface {
 	
 	
-	@Autowired
-	private DoctorRepository doctorRepository;
+
 	
 	@Autowired
 	private PatientRepository patientRepository;
@@ -32,16 +31,13 @@ public class PrescriptionService implements PrescriptionInterface {
 	private PrescriptionRepository repo1;
 	
 	public void addPrescription(Prescription prescription) {
-		//Doctor doctor = doctorRepository.findById(prescription.getDoctor().getId())
-	            //.orElseThrow(() -> new RuntimeException("Doctor not found"));
+		
 		Patient patient = patientRepository.findById(prescription.getPatient().getId())
 	            .orElseThrow(() -> new RuntimeException("Patient not found"));
-		//prescription.setDoctor(doctor);
 		prescription.setPatient(patient);
 	Prescription p=new Prescription();
 	p.setMedicineName(prescription.getMedicineName());
 	p.setInstructions(prescription.getInstructions());
-	//p.setDoctor(prescription.getDoctor());
 	p.setPatient(prescription.getPatient());
 		 repo1.save(prescription);
 		
@@ -54,18 +50,10 @@ public class PrescriptionService implements PrescriptionInterface {
 		
 		
 	}
-	
-	
-	
-	
 	public List<Prescription> getAllPrescription() {
 		
 		return repo1.findAll();
 	}
-	
-	
-	
-	
 	public boolean delPrescription(int id)
 	{
 		if(repo1.existsById(id))
@@ -77,9 +65,6 @@ public class PrescriptionService implements PrescriptionInterface {
 			return false;
 		}
 	}
-	
-	
-
 	public Prescription updatedPrescription(int id,Prescription updatedprescription)
 	{
 		
@@ -102,13 +87,7 @@ public class PrescriptionService implements PrescriptionInterface {
 		
 		
 	}
-	/*public byte[] getPrescriptionFileById(int id) {
-	    Optional<Prescription> presOpt = repo1.findById(id);
-	    if (presOpt.isPresent()) {
-	        return presOpt.get().getFileData(); // assuming fileData is stored as byte[] in DB
-	    }
-	    return null;
-	}*/
+	
 
     public byte[] generatePrescriptionPdf(int id) throws Exception {
         Optional<Prescription> opt = repo1.findById(id);
@@ -130,7 +109,7 @@ public class PrescriptionService implements PrescriptionInterface {
         document.add(new Paragraph("Digital Prescription", titleFont));
         document.add(new Paragraph(" ")); // spacer
         document.add(new Paragraph("Doctor: " + doctor.getId(), textFont));
-        document.add(new Paragraph("Patient: " + patient.getId(), textFont));
+        document.add(new Paragraph("Patient: " + patient.getName(), textFont));
         document.add(new Paragraph("Instructions: " + p.getInstructions(), textFont));
         document.add(new Paragraph("Medicine name: " + p.getMedicineName(), textFont));
 
